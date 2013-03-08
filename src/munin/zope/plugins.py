@@ -13,6 +13,7 @@ class zodbactivity(SimpleMultiGraph):
              'Total_connections']
     title = 'ZODB Activity'
     category = 'Zope'
+    vlabel = "no"
 
 
 class zopecache(SimpleMultiGraph):
@@ -21,6 +22,7 @@ class zopecache(SimpleMultiGraph):
              'Target_number_to_cache']
     title = 'Zope cache parameters'
     category = 'Zope'
+    vlabel = "no"
 
 
 class zopethreads(SimpleMultiGraph):
@@ -28,6 +30,7 @@ class zopethreads(SimpleMultiGraph):
     names = ['Total_threads', 'Free_threads']
     title = 'Z2Server threads'
     category = 'Zope'
+    vlabel = "no"
 
 
 keys = vmkeys()
@@ -38,6 +41,7 @@ class zopememory(SimpleMultiGraph):
     names = keys
     title = 'Zope memory usage'
     category = 'Zope'
+    vlabel = "no"
 
 
 def install(script, cmd, path, prefix=None, suffix=None):
