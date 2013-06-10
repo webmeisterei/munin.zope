@@ -1,10 +1,11 @@
-from gocept.munin.client import SimpleMultiGraph, main
+from gocept.munin.client import SimpleMultiGraph, main, SimpleGraph
 from munin.zope.memory import vmkeys
 from os.path import isdir, basename, abspath, normpath, join, exists
 from os import environ, getcwd, symlink
 from inspect import isclass
 from socket import gethostname
 from sys import argv
+import urllib
 
 
 class zodbactivity(SimpleMultiGraph):
@@ -44,6 +45,16 @@ class zopememory(SimpleMultiGraph):
     vlabel = "no"
 
 
+class zodbblobsize(SimpleGraph):
+    key = name = 'blobsize' 
+    title = 'Size of Blobstorage'
+    category = 'Zope'
+    
+    #XXX munin.zope: add support for custom vlabel and cdef similar to Products.ZNagios.munin_client
+    cdef = '%s,1048576,/'
+    vlabel = 'Size in MB'
+    
+    
 def install(script, cmd, path, prefix=None, suffix=None):
     """ set up plugin symlinks using the given prexix/suffix or the
         current hostname and directory """
@@ -68,12 +79,28 @@ def run(ip_address='localhost', http_address=8080, port_base=0, user=None,
         secret = None):
     if 3 <= len(argv) <= 5 and argv[1] == 'install':
         return install(*argv)
+    
     port = int(http_address) + int(port_base)
     host = '%s:%d' % (ip_address, port)
+    base_url = 'http://%s/@@munin.zope.plugins/%%s' % host
+    params = {}
+    
+    prefix, plugin, suffix = basename(argv[0]).split('_')
+    if plugin in ['zodbblobsize']:
+        if '-' in suffix:
+            params.update(filestorage = suffix.split('-')[1])
+#        else:
+#            # to enable this, the graphs would need to declare all keys with suffixes
+#            params.update(filestorage = '*')
+    if secret is not None:
+        params.update(secret=secret)
+    
+    url = base_url
+    if params:
+        url = base_url + '?' + urllib.urlencode(params).replace('%', '%%')
+        
     if not 'URL' in environ:
-        environ['URL'] = 'http://%s/@@munin.zope.plugins/%%s' % host
+        environ['URL'] = url
     if not 'AUTH' in environ and user is not None:
         environ['AUTH'] = user
-    if secret is not None:
-        environ['URL'] = 'http://%s/@@munin.zope.plugins/%%s?secret=%s' % (host, secret)
     main()

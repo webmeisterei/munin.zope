@@ -7,7 +7,7 @@
         for="*"
         name="munin.zope.plugins"
         class=".browser.Munin"
-        allowed_attributes="zopecache zodbactivity zopememory"
+        allowed_attributes="zopecache zodbactivity zopememory zodbblobsize"
         permission="zope2.View"
         />
 

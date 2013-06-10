@@ -18,6 +18,7 @@ if sys.version_info < (2, 5):
     thread = threadframe.dict
 else:
     thread = sys._current_frames
+from blobsize import getFolderSize
 
 PERMISSION = "View management screens"
 log = getLogger('munin.zope')
@@ -140,6 +141,24 @@ class Munin(BrowserView):
             (suffix, (len(db.cache_detail_length()) * db.cache_size())))
         return '\n'.join(result)
 
+    @perm
+    @timer
+    def zodbblobsize(self):
+        """ size of blobstorage directory """
+        
+        #todo enable multigraph in a separate plugin
+#        result = []
+#        for db, suffix in self._getdbs():
+#            result.append('blobsize:%d' % getFolderSize(db._getDB()._storage.blob_dir))
+#        return '\n'.join(result)
+
+        storagename = self.request.get('filestorage', 'main')
+
+        dbs = self.context.Control_Panel.Database
+        db = dbs[storagename]
+        return 'blobsize:%d' % getFolderSize(db._getDB()._storage.blob_dir)
+
+        
     @perm
     @timer
     def zodbactivity(self):
